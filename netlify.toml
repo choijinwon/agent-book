@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build:netlify"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Configure server secrets in the Netlify UI with Functions scope.
+# Netlify automatically installs its Next.js adapter for this build.

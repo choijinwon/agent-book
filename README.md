@@ -73,3 +73,11 @@ Node 22.13+에서 `npm ci`, `npm run dev`로 실행합니다. 로컬 인증값�
 ISBN으로 확인된 4개 작품(6개 판본)에만 K-pop을 연결합니다. 『소년이 온다』–BTS 봄날, 『작별하지 않는다』–AKMU 어떻게 이별까지 사랑하겠어 널 사랑하는 거지, 『데미안』–BTS 피 땀 눈물, 『코스모스』–BTS 소우주입니다. 각 조합은 도서와 음악 자료를 함께 제시하며 연결은 선곡자의 주제 해석임을 표시합니다. 같은 역사적 사건에서 만들어진 음악이나 책의 공식 OST라고 주장하지 않습니다.
 
 장르별 기본 피아노 추천과 무조건 2곡 채우기를 제거했습니다. 근거가 없는 책에는 아직 연관 K-pop을 선정하지 못했다고 표시합니다. YouTube Music의 곡명·아티스트 검색으로 이동하며 음원·가사를 저장하거나 자동 재생하지 않습니다.
+
+## Netlify 배포
+
+`agent-bookai` 프로젝트에서 GitHub `choijinwon/agent-book` 저장소의 `main` 브랜치를 연결합니다. 저장소 루트를 base directory로 사용하며 `netlify.toml`이 빌드 명령 `npm run build:netlify`, 게시 디렉터리 `.next`, Node 22를 설정합니다. Netlify의 Next.js 어댑터가 페이지와 서버 API를 배포합니다.
+
+Netlify의 Environment variables에 `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET`을 서버 Functions에서 사용할 수 있도록 등록해야 합니다. Sites에 저장한 비밀값은 Netlify로 자동 이전되지 않습니다. AI 모델 추천을 활성화하려면 선택적으로 `OPENAI_API_KEY`와 `OPENAI_MODEL`을 추가합니다. 키 이름에 `NEXT_PUBLIC_`을 붙이지 마세요. 환경변수 변경 후 재배포합니다.
+
+Netlify와 같은 Node 실행 환경은 `lib/runtime-env.ts`에서 서버 환경변수를 읽고, 기존 Sites 빌드는 Vite 별칭으로 Cloudflare 어댑터를 사용합니다. 기존 `npm run dev`·`npm run build`는 Sites용으로 유지합니다. Netlify용 로컬 확인은 `.env.local`에 인증값을 설정하고 `npm run build:netlify`, `npm run start:netlify`로 실행합니다.

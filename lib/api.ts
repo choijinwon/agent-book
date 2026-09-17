@@ -1,8 +1,8 @@
 import type {AIKeys} from './recommend';
-import { env } from 'cloudflare:workers';
+import { runtimeKeys } from '@/lib/runtime-env';
 import { CatalogError, loadCatalog, type Keys } from './providers';
 const cache = new Map<string,{expires:number;body:unknown}>();
-export function keys():AIKeys { return env as unknown as AIKeys; }
+export function keys():AIKeys { return runtimeKeys(); }
 export async function catalogResponse(request:Request,trends=false) {
  const q=new URL(request.url).searchParams.get('q')?.trim()||'';
  if(!trends&&(!q||q.length>100)) return Response.json({error:'검색어를 1~100자로 입력하세요.'},{status:400});
