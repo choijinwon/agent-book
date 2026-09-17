@@ -1,3 +1,4 @@
+import {withSavedPrices} from './saved-prices.ts';
 import {enrichPrices} from './prices.ts';
 import { type Book, mergeBooks, normalizeIsbn, safeUrl } from './books.ts';
 export type Keys = { ALADIN_TTB_KEY?: string; NAVER_CLIENT_ID?: string; NAVER_CLIENT_SECRET?: string };
@@ -71,5 +72,5 @@ export async function loadCatalog(keys:Keys,query:string,trends=false):Promise<C
  const sources:string[]=[];const warnings:string[]=[];const groups:Book[][]=[];
  results.forEach((result,i)=>{if(result.status==='fulfilled'){sources.push(tasks[i].name);groups.push(result.value);}else warnings.push(`${tasks[i].name} 응답을 받지 못했습니다. 잠시 후 다시 시도하세요.`);});
  if(!groups.length) throw new CatalogError(502,'도서 정보를 불러오지 못했습니다. 잠시 후 다시 시도하세요.');
- return {books:await enrichPrices(mergeBooks(groups)),source:sources.join(' · '),fetchedAt:new Date().toISOString(),warnings,demo:false};
+ return {books:withSavedPrices(await enrichPrices(mergeBooks(groups))),source:sources.join(' · '),fetchedAt:new Date().toISOString(),warnings,demo:false};
 }
