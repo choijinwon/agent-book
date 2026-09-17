@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadCatalog, aladinBook, naverBook, naverInterest } from '../lib/providers.ts';
 const keys={ALADIN_TTB_KEY:'test-only',NAVER_CLIENT_ID:'test-only',NAVER_CLIENT_SECRET:'test-only'};
-test('missing keys gives explicit unconfigured response, never demo',async()=>{
- await assert.rejects(loadCatalog({},'소설'),e=>e.status===503);
+test('missing keys searches collected books while trends require connection',async()=>{
+ const result=await loadCatalog({},'불편한편의점');assert.equal(result.demo,false);assert.ok(result.books.some(b=>b.title==='불편한 편의점'));
  await assert.rejects(loadCatalog({},'',true),e=>e.status===503);
 });
 test('partial failure preserves valid books and reports unavailable source',async t=>{
@@ -15,7 +15,7 @@ test('partial failure preserves valid books and reports unavailable source',asyn
 });
 test('total upstream failure becomes safe error without key disclosure',async t=>{
  t.mock.method(globalThis,'fetch',async()=>Response.json({errorCode:'invalid key',errorMessage:'test-only'},{status:401}));
- await assert.rejects(loadCatalog(keys,'책'),e=>e.status===502&&!e.message.includes('test-only'));
+ const result=await loadCatalog(keys,'불편한 편의점');assert.equal(result.demo,false);assert.ok(result.books.length);assert.ok(!JSON.stringify(result).includes('test-only'));assert.ok(result.warnings.length);
 });
 test('trend request uses domestic Bestseller API and preserves ranks',async t=>{
  t.mock.method(globalThis,'fetch',async url=>{

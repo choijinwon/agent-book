@@ -81,3 +81,7 @@ ISBN으로 확인된 4개 작품(6개 판본)에만 K-pop을 연결합니다. �
 Netlify의 Environment variables에 `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET`을 서버 Functions에서 사용할 수 있도록 등록해야 합니다. Sites에 저장한 비밀값은 Netlify로 자동 이전되지 않습니다. AI 모델 추천을 활성화하려면 선택적으로 `OPENAI_API_KEY`와 `OPENAI_MODEL`을 추가합니다. 키 이름에 `NEXT_PUBLIC_`을 붙이지 마세요. 환경변수 변경 후 재배포합니다.
 
 Netlify와 같은 Node 실행 환경은 `lib/runtime-env.ts`에서 서버 환경변수를 읽고, 기존 Sites 빌드는 Vite 별칭으로 Cloudflare 어댑터를 사용합니다. 기존 `npm run dev`·`npm run build`는 Sites용으로 유지합니다. Netlify용 로컬 확인은 `.env.local`에 인증값을 설정하고 `npm run build:netlify`, `npm run start:netlify`로 실행합니다.
+
+## 수집 자료 검색 대체 경로
+
+일반 도서 검색도 API 인증값이 없거나 외부 검색이 실패·무응답일 때 공개 상품 소개를 수집한 112권에서 검색합니다. 제목의 띄어쓰기·문장부호, 저자, 하이픈이 있는 ISBN을 정규화하고 제목·ISBN 일치를 우선합니다. 수집 범위와 출처를 안내하고 7일이 지난 가격은 숨깁니다. 이 기능은 전체 웹 실시간 크롤링이나 자동 정기 수집이 아닙니다.

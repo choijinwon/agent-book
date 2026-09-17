@@ -69,7 +69,7 @@ export default function Home() {
   <form className="searchbox" onSubmit={e=>{e.preventDefault();void search(query);}}><Search aria-hidden="true"/><input aria-label="책 검색" placeholder="어떤 책을 찾고 있나요? 제목, 저자, ISBN" maxLength={100} value={query} onChange={e=>setQuery(e.target.value)}/><button type="submit" disabled={busy}>{busy?'찾는 중':'책 찾기'} <ArrowUpRight size={18}/></button></form>
   <div className="search-meta"><div className="suggestions"><span>검색해 보세요</span>{(mode==='demo'?['소설','습관','과학']:['한강','인공지능','한국소설']).map(q=><button key={q} onClick={()=>void search(q)}>{q}</button>)}</div></div>
   {recent.length>0&&<div className="recent"><span>최근 검색</span>{recent.map(q=><button key={q} onClick={()=>void search(q)}>{q}</button>)}<button aria-label="최근 검색 지우기" onClick={()=>{setRecent([]);try{localStorage.removeItem('agent-book-recent');}catch{}}}><X size={14}/></button></div>}
-  <div className="notice"><Info size={17}/><span>{mode==='demo'?'예시 모드 · 도서, 가격, 순위는 가상 데이터입니다.':'서점 상품 검색 · YES24 일부 상품의 판매가 수집 · 배송비는 서점 확인'}</span></div>
+  <div className="notice"><Info size={17}/><span>{mode==='demo'?'예시 모드 · 도서, 가격, 순위는 가상 데이터입니다.':'제목·저자·ISBN 검색 · API 연결 전에는 수집 도서에서 검색 · 배송비는 서점 확인'}</span></div>
   <Tabs value={tab} onValueChange={value=>{setTab(value);if(value==='recommend')return;setBudget('all');void load(value==='trends'?'':query,value,mode);}}>
    <TabsList className="main-tabs" variant="line"><TabsTrigger value="recommend">오늘의 추천 <span>01</span></TabsTrigger><TabsTrigger value="discover">도서 탐색 <span>02</span></TabsTrigger><TabsTrigger value="trends">독서 트렌드 <span>03</span></TabsTrigger></TabsList>
    {error&&<div className="error" role="alert"><span>{error}</span><button onClick={()=>void load(query,tab,mode)}>다시 시도</button></div>}

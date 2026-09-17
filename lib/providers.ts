@@ -1,3 +1,4 @@
+import {searchCollected,collectedCount} from './collected-search.ts';
 import {withSavedPrices} from './saved-prices.ts';
 import {enrichPrices} from './prices.ts';
 import { type Book, mergeBooks, normalizeIsbn, safeUrl } from './books.ts';
@@ -62,15 +63,20 @@ export async function naverInterest(keys:Keys, now=new Date()):Promise<Catalog> 
  return {books:[],source:'네이버 데이터랩 · 검색어 트렌드',fetchedAt:new Date().toISOString(),warnings:[],demo:false,interest:{startDate,endDate,series:data.results.map(r=>({title:clean(r.title),keyword:clean(r.keywords[0]),data:r.data.filter(p=>Number.isFinite(Number(p.ratio))&&Number(p.ratio)>=0&&Number(p.ratio)<=100).map(p=>({period:p.period,ratio:Number(p.ratio)}))}))}};
 }
 export class CatalogError extends Error { status:number; constructor(status:number,message:string){super(message);this.status=status;} }
+function collectedCatalog(query:string, warnings:string[]=[]):Catalog {
+ return {books:searchCollected(query),source:'YES24 공개 상품 수집 자료',fetchedAt:new Date().toISOString(),demo:false,warnings:[...warnings,`수집한 ${collectedCount}권에서 검색했습니다. 전체 서점 실시간 검색이 아니며, 가격은 수집 시점 기준입니다. 검색 결과가 없으면 제목·저자·ISBN을 바꾸거나 서점 직접 검색을 이용하세요.`]};
+}
 export async function loadCatalog(keys:Keys,query:string,trends=false):Promise<Catalog> {
  if(trends&&keys.NAVER_CLIENT_ID&&keys.NAVER_CLIENT_SECRET)return naverInterest(keys);
  const tasks: {name:string;run:Promise<Book[]>}[]=[];
  if(keys.ALADIN_TTB_KEY) tasks.push({name:'알라딘',run:aladin(keys,query,trends)});
  if(!trends&&keys.NAVER_CLIENT_ID&&keys.NAVER_CLIENT_SECRET) tasks.push({name:'네이버 웹 검색',run:naver(keys,query)});
+ if(!tasks.length&&!trends)return collectedCatalog(query);
  if(!tasks.length) throw new CatalogError(503,trends?'네이버 데이터랩 연결 후 실제 검색어 트렌드를 볼 수 있습니다.':'도서 서비스 연결 전입니다. 예시 모드 또는 서점 직접 검색을 이용하세요.');
  const results=await Promise.allSettled(tasks.map(t=>t.run));
  const sources:string[]=[];const warnings:string[]=[];const groups:Book[][]=[];
  results.forEach((result,i)=>{if(result.status==='fulfilled'){sources.push(tasks[i].name);groups.push(result.value);}else warnings.push(`${tasks[i].name} 응답을 받지 못했습니다. 잠시 후 다시 시도하세요.`);});
+ if(!trends&&(!groups.length||groups.every(group=>!group.length)))return collectedCatalog(query,warnings);
  if(!groups.length) throw new CatalogError(502,'도서 정보를 불러오지 못했습니다. 잠시 후 다시 시도하세요.');
  return {books:withSavedPrices(await enrichPrices(mergeBooks(groups))),source:sources.join(' · '),fetchedAt:new Date().toISOString(),warnings,demo:false};
 }
