@@ -75,7 +75,7 @@ export default function Home() {
   <div className="notice"><Info size={17}/><span>{mode==='demo'?'예시 모드 · 도서, 가격, 순위는 가상 데이터입니다.':'제목·저자·ISBN 검색 · API 연결 전에는 수집 도서에서 검색 · 배송비는 서점 확인'}</span></div>
   </div></div>
   <Tabs value={tab} onValueChange={value=>{setTab(value);if(value==='recommend'||value==='date'||value==='journal'){++sequence.current;setBusy(false);setError('');setCatalog({books:[],source:'',fetchedAt:'',warnings:[],demo:false});return;}setBudget('all');void load(value==='trends'?'':query,value,mode);}}>
-   <TabsList className="main-tabs" variant="line"><TabsTrigger value="recommend">오늘의 추천 <span>01</span></TabsTrigger><TabsTrigger value="discover">도서 탐색 <span>02</span></TabsTrigger><TabsTrigger value="trends">독서 트렌드 <span>03</span></TabsTrigger><TabsTrigger value="date">책 소개팅 <span>04</span></TabsTrigger><TabsTrigger value="journal">독서 기록 <span>05</span></TabsTrigger></TabsList>
+   <TabsList className="main-tabs" variant="line"><TabsTrigger value="recommend">오늘의 추천 <span>01</span></TabsTrigger><TabsTrigger value="discover">도서 탐색 <span>02</span></TabsTrigger><TabsTrigger value="trends">독서 트렌드 <span>03</span></TabsTrigger><TabsTrigger value="date">책 소개팅 <span>04</span></TabsTrigger><TabsTrigger value="journal">내 3D 책장 <span>05</span></TabsTrigger></TabsList>
    {error&&<div className="error" role="alert"><span>{error}</span><button onClick={()=>void load(query,tab,mode)}>다시 시도</button></div>}
    {catalog.warnings.map(w=><p className="error" key={w}>{w}</p>)}
    <TabsContent value="recommend"><BookRecommender recent={recent} ready={status.ai} onSearch={q=>{setMode('live');setQuery(q);setTab('discover');remember(q);void load(q,'discover','live');}}/></TabsContent>

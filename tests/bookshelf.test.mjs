@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {shelfBook,readShelfTheme,spineTone} from '../lib/bookshelf.ts';
+test('shelf connects verified ISBNs and avoids guessing covers for unknown or ambiguous books',()=>{assert.equal(shelfBook({id:'9788936434120',title:'소년이 온다',author:'한강'}).isbn,'9788936434120');assert.equal(shelfBook({id:'custom',title:'없는 책',author:''}),null);const b={isbn:'1',title:'같은 제목',author:'저자'};assert.equal(shelfBook({id:'custom',title:b.title,author:b.author},[b,{...b,isbn:'2'}]),null);assert.equal(shelfBook({id:'custom',title:b.title,author:b.author},[b]),b);});
+test('theme restores only supported values and spine colors are stable',()=>{assert.equal(readShelfTheme('night'),'night');assert.equal(readShelfTheme('invalid'),'wood');assert.equal(readShelfTheme(null),'wood');assert.equal(spineTone('book'),spineTone('book'));assert.ok(spineTone('책')>=0&&spineTone('책')<6);});
