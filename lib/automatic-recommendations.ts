@@ -1,6 +1,6 @@
 import saved from '../data/prices.json' with {type:'json'};
 import type {Book} from './books.ts';
-const selections=[
+export const selections=[
  {id:'yes24-99308021',tags:['소설','위로','편안','따뜻','편의점','힐링'],reason:'평범한 일상과 사람 사이의 온기를 만나고 싶을 때 골라 볼 소설입니다.'},
  {id:'yes24-172574653',tags:['경제','돈','투자','재테크','심리','경영'],reason:'돈을 대하는 판단과 행동을 돌아보고 싶을 때 읽어 볼 책입니다. 구체적인 투자 종목보다 생각의 습관에 관심이 있는 분께 권합니다.'},
  {id:'yes24-2312211',tags:['과학','우주','별','코스모스','천문'],reason:'일상에서 시선을 넓혀 우주와 인간의 자리를 생각하고 싶을 때 권합니다. 천천히 읽으며 호기심을 따라가 보세요.'},
