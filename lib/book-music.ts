@@ -19,5 +19,5 @@ const special:Record<string,{tracks:TrackId[];reason:string}>={
 export function musicForBook(book:Pick<Book,'id'|'category'>){
  const exact=special[book.id];const category=book.category||'';
  const profile=exact||(/과학|IT|컴퓨터/.test(category)?{tracks:['near','glass'] as TrackId[],reason:'이 책의 분야를 기준으로, 새로운 개념을 읽는 시간에 어울릴 공간감 있는 연주를 골랐습니다.'}:/경제|경영|자기계발/.test(category)?{tracks:['glass','ambre'] as TrackId[],reason:'이 책의 분야를 기준으로, 생각을 정리하며 읽을 때 곁들일 피아노 연주를 골랐습니다.'}:{tracks:['ambre','saman'] as TrackId[],reason:'상세 분위기 정보가 없는 책에는 잔잔한 피아노를 기본 조합으로 제안합니다.'});
- return {reason:profile.reason,basis:exact?'책별 선정':'분야·기본 선정',tracks:profile.tracks.map(id=>({id,...readingTracks[id]}))};
+ return {reason:profile.reason,basis:exact?'책별 선정':'분야·기본 선정',tracks:profile.tracks.map(id=>({id,...readingTracks[id],listenUrl:`https://music.youtube.com/search?q=${encodeURIComponent(readingTracks[id].artist+' '+readingTracks[id].title)}`}))};
 }
