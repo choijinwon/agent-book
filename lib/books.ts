@@ -1,5 +1,5 @@
-export type Offer = { store: string; price: number; shipping: number | null; url: string; kind: "seller" | "aggregate"; available: boolean };
-export type Book = { id: string; isbn: string; title: string; author: string; publisher: string; category: string; description: string; cover?: string; rank?: number; offers: Offer[] };
+export type Offer = { store: string; checkedAt?: string; price: number; shipping: number | null; url: string; kind: "seller" | "aggregate"; available: boolean };
+export type Book = { id: string; isbn: string; title: string; author: string; publisher: string; category: string; description: string; sourceUrl?: string; cover?: string; rank?: number; offers: Offer[] };
 export function money(value: number | undefined | null) { return value == null ? "확인 필요" : `${value.toLocaleString("ko-KR")}원`; }
 export function bestOffer(offers: Offer[]) {
   return offers.filter(o=>o.kind === "seller" && o.available && Number.isFinite(o.price) && o.price > 0 && o.shipping !== null && Number.isFinite(o.shipping) && o.shipping >= 0).map(o=>({...o,total:o.price+o.shipping!})).sort((a,b)=>a.total-b.total)[0];
