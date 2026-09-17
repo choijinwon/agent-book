@@ -1,0 +1,2 @@
+import {discoverySearch,searchModes,type SearchMode} from '@/lib/discovery';
+export function GET(request:Request){const p=new URL(request.url).searchParams;const q=p.get('q')?.trim()||'';const mode=p.get('mode')||'situation';if(q.length<2||q.length>300||!searchModes.includes(mode as SearchMode))return Response.json({error:'검색 문장을 2~300자로 입력해 주세요.'},{status:400});return Response.json(discoverySearch(q,mode as SearchMode),{headers:{'Cache-Control':'no-store'}});}

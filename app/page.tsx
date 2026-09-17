@@ -1,5 +1,6 @@
 "use client";
 
+import {SentenceSearch} from "@/components/sentence-search";
 import {BookRecommender} from "@/components/book-recommender";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen, Search, ArrowUpRight, TrendingUp, SlidersHorizontal, Info, X, GitCompareArrows } from "lucide-react";
@@ -63,6 +64,7 @@ export default function Home() {
  return <main className="shell">
   <header className="topbar"><a className="brand" href="/"><BookOpen size={24}/><span>agent<b>book</b></span></a><span className="edition">읽고 싶은 내일을 발견하다</span><Select value={mode} onValueChange={value=>{setMode(value);setBudget('all');void load(query,tab,value);}}><SelectTrigger aria-label="데이터 모드" className="mode"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="demo">예시 데이터</SelectItem><SelectItem value="live">실제 검색</SelectItem></SelectContent></Select></header>
   <section className="intro"><div><p className="eyebrow"><span/> A LITTLE CURIOSITY, A NEW CHAPTER</p><h1>다음에 읽을 책,<br/><span>여기서 발견하세요.</span></h1><p className="intro-description">나에게 닿는 추천부터 한눈에 보는 가격까지.<br/>책을 고르는 시간이 조금 더 즐거워집니다.</p></div><div className="hero-shelf" aria-hidden="true"><span className="shelf-orbit"/><img className="shelf-book shelf-one" src="https://image.yes24.com/goods/99308021/xl" alt=""/><img className="shelf-book shelf-two" src="https://image.yes24.com/goods/2312211/xl" alt=""/><span className="shelf-caption">A GOOD BOOK.<br/>A NEW PERSPECTIVE.</span><span className="shelf-star">✳</span></div></section>
+  <SentenceSearch onSearch={q=>{setMode('live');setQuery(q);setTab('discover');void load(q,'discover','live');}}/>
   <form className="searchbox" onSubmit={e=>{e.preventDefault();void search(query);}}><Search aria-hidden="true"/><input aria-label="책 검색" placeholder="어떤 책을 찾고 있나요? 제목, 저자, ISBN" maxLength={100} value={query} onChange={e=>setQuery(e.target.value)}/><button type="submit" disabled={busy}>{busy?'찾는 중':'책 찾기'} <ArrowUpRight size={18}/></button></form>
   <div className="search-meta"><div className="suggestions"><span>검색해 보세요</span>{(mode==='demo'?['소설','습관','과학']:['한강','인공지능','한국소설']).map(q=><button key={q} onClick={()=>void search(q)}>{q}</button>)}</div></div>
   {recent.length>0&&<div className="recent"><span>최근 검색</span>{recent.map(q=><button key={q} onClick={()=>void search(q)}>{q}</button>)}<button aria-label="최근 검색 지우기" onClick={()=>{setRecent([]);try{localStorage.removeItem('agent-book-recent');}catch{}}}><X size={14}/></button></div>}
