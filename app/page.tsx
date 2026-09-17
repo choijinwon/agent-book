@@ -1,5 +1,6 @@
 "use client";
 
+import {BookRecommender} from "@/components/book-recommender";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen, Search, ArrowUpRight, TrendingUp, SlidersHorizontal, Info, X, GitCompareArrows } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -23,14 +24,14 @@ function StoreLinks({query}:{query:string}) {return <div className="store-links"
 function Price({book,demo}:{book:Book;demo:boolean}) {if(book.sourceUrl&&!book.offers.length)return <div className="card-price"><small>실제 판매가는 서점에서 확인</small><strong style={{fontSize:16}}>가격 미제공</strong></div>;const best=bestOffer(book.offers); const known=book.offers.filter(o=>o.available&&o.price>0);const lowest=known.length?Math.min(...known.map(o=>o.price)):undefined;return <div className="card-price"><small>{demo?"예시 최적가 · 배송비 포함":best?"확인된 판매처 중 최적가":"수집된 상품가 · 배송비 별도"}</small><strong>{money(best?.total??lowest)}</strong>{!demo&&!best&&<span className="price-note">{book.offers[0]?.checkedAt?`${new Date(book.offers[0].checkedAt).toLocaleDateString('ko-KR')} 수집 · `:''}배송비 미확인</span>}</div>;}
 export default function Home() {
  const [query,setQuery]=useState("");const [submitted,setSubmitted]=useState("");
- const [mode,setMode]=useState("live");const [tab,setTab]=useState("discover");
+ const [mode,setMode]=useState("live");const [tab,setTab]=useState("recommend");
  const [catalog,setCatalog]=useState<Catalog>({...demoCatalog,books:[],source:"",demo:false});const [category,setCategory]=useState("전체");
  const [budget,setBudget]=useState("all");const [sort,setSort]=useState("recommended");
  const [busy,setBusy]=useState(false);const [error,setError]=useState("");
- const [recent,setRecent]=useState<string[]>([]);const [status,setStatus]=useState({aladin:false,naver:false});
+ const [recent,setRecent]=useState<string[]>([]);const [status,setStatus]=useState<{aladin:boolean;naver:boolean;ai:boolean|null}>({aladin:false,naver:false,ai:null});
  const [detail,setDetail]=useState<Book|null>(null);const [compared,setCompared]=useState<Book[]>([]);const [compareOpen,setCompareOpen]=useState(false);
  const sequence=useRef(0);
- useEffect(()=>{try {const values=JSON.parse(localStorage.getItem("agent-book-recent")||"[]");if(Array.isArray(values))setRecent(values.filter(v=>typeof v==="string"&&v.length<=100).slice(0,5));}catch{}fetch('/api/status').then(r=>r.json() as Promise<{aladin:boolean;naver:boolean}>).then(setStatus).catch(()=>{});},[]);
+ useEffect(()=>{try {const values=JSON.parse(localStorage.getItem("agent-book-recent")||"[]");if(Array.isArray(values))setRecent(values.filter(v=>typeof v==="string"&&v.length<=100).slice(0,5));}catch{}fetch('/api/status').then(r=>r.json() as Promise<{aladin:boolean;naver:boolean;ai:boolean}>).then(setStatus).catch(()=>setStatus({aladin:false,naver:false,ai:false}));},[]);
  const remember=(q:string)=>{if(!q)return;setRecent(previous=>{const next=[q,...previous.filter(x=>x!==q)].slice(0,5);try{localStorage.setItem("agent-book-recent",JSON.stringify(next));}catch{}return next;});};
  const load=useCallback(async(q:string,nextTab:string,nextMode:string)=>{
   const current=++sequence.current;setError("");setSubmitted(q);setCategory("전체");setCompared([]);
@@ -66,10 +67,11 @@ export default function Home() {
   <div className="search-meta"><div className="suggestions"><span>검색해 보세요</span>{(mode==='demo'?['소설','습관','과학']:['한강','인공지능','한국소설']).map(q=><button key={q} onClick={()=>void search(q)}>{q}</button>)}</div></div>
   {recent.length>0&&<div className="recent"><span>최근 검색</span>{recent.map(q=><button key={q} onClick={()=>void search(q)}>{q}</button>)}<button aria-label="최근 검색 지우기" onClick={()=>{setRecent([]);try{localStorage.removeItem('agent-book-recent');}catch{}}}><X size={14}/></button></div>}
   <div className="notice"><Info size={17}/><span>{mode==='demo'?'예시 모드 · 도서, 가격, 순위는 가상 데이터입니다.':'서점 상품 검색 · YES24 일부 상품의 판매가 수집 · 배송비는 서점 확인'}</span></div>
-  <Tabs value={tab} onValueChange={value=>{setTab(value);setBudget('all');void load(value==='trends'?'':query,value,mode);}}>
-   <TabsList className="main-tabs" variant="line"><TabsTrigger value="discover">도서 탐색 <span>01</span></TabsTrigger><TabsTrigger value="trends">독서 트렌드 <span>02</span></TabsTrigger></TabsList>
+  <Tabs value={tab} onValueChange={value=>{setTab(value);if(value==='recommend')return;setBudget('all');void load(value==='trends'?'':query,value,mode);}}>
+   <TabsList className="main-tabs" variant="line"><TabsTrigger value="recommend">AI 맞춤 추천 <span>01</span></TabsTrigger><TabsTrigger value="discover">도서 탐색 <span>02</span></TabsTrigger><TabsTrigger value="trends">독서 트렌드 <span>03</span></TabsTrigger></TabsList>
    {error&&<div className="error" role="alert"><span>{error}</span><button onClick={()=>void load(query,tab,mode)}>다시 시도</button></div>}
    {catalog.warnings.map(w=><p className="error" key={w}>{w}</p>)}
+   <TabsContent value="recommend"><BookRecommender ready={status.ai} onSearch={q=>{setMode('live');setQuery(q);setTab('discover');remember(q);void load(q,'discover','live');}}/></TabsContent>
    <TabsContent value="discover">
     <div className="workspace"><aside className="filters" aria-label="도서 필터"><div className="category-list">{categories.map(c=><button key={c} className={category===c?'selected':''} aria-pressed={category===c} onClick={()=>setCategory(c)}>{c}<span>{c==='전체'?catalog.books.length:catalog.books.filter(b=>b.category===c).length}</span></button>)}</div><div className="budget-filter"><span>배송비 포함</span><Select value={budget} onValueChange={setBudget}><SelectTrigger aria-label="배송비 포함 예산"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="all">제한 없음</SelectItem><SelectItem value="15000">15,000원 이하</SelectItem><SelectItem value="20000">20,000원 이하</SelectItem><SelectItem value="30000">30,000원 이하</SelectItem></SelectContent></Select><button className="reset-filter" onClick={reset}>초기화</button></div><p className="filter-help">예산 필터는 배송비까지 확인된 도서에 적용됩니다.</p></aside>
     <section className="results" aria-busy={busy}><div className="section-head"><h2>{submitted?`“${submitted}” 검색 결과`:'발견할 책들'} <span className="count">{visible.length}</span></h2><Select value={sort} onValueChange={setSort}><SelectTrigger aria-label="도서 정렬"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="recommended">기본순</SelectItem><SelectItem value="price">확인된 총액 낮은순</SelectItem><SelectItem value="title">제목순</SelectItem></SelectContent></Select></div>
