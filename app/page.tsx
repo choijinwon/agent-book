@@ -36,12 +36,11 @@ export default function Home() {
  useEffect(()=>{try {const values=JSON.parse(localStorage.getItem("agent-book-recent")||"[]");if(Array.isArray(values))setRecent(values.filter(v=>typeof v==="string"&&v.length<=100).slice(0,5));}catch{}fetch('/api/status').then(r=>r.json() as Promise<{aladin:boolean;naver:boolean;ai:boolean}>).then(setStatus).catch(()=>setStatus({aladin:false,naver:false,ai:false}));},[]);
  const remember=(q:string)=>{if(!q)return;setRecent(previous=>{const next=[q,...previous.filter(x=>x!==q)].slice(0,5);try{localStorage.setItem("agent-book-recent",JSON.stringify(next));}catch{}return next;});};
  const load=useCallback(async(q:string,nextTab:string,nextMode:string)=>{
-  const current=++sequence.current;setError("");setSubmitted(q);setCategory("전체");setCompared([]);
+  const current=++sequence.current;setError("");setSubmitted(q);setCategory("전체");setBudget("all");setCompared([]);
   if(nextMode==='demo'){setCatalog(demoCatalog);setBusy(false);return demoBooks;}
   setCatalog({books:[],source:"",fetchedAt:"",warnings:[],demo:false});
-  if(nextTab==='discover'&&!q){setBusy(false);return [];}
   setBusy(true);
-  try{const response=await fetch(nextTab==='trends'?'/api/trends':`/api/books?q=${encodeURIComponent(q)}`);const body=await response.json() as Catalog & {error?:string};if(!response.ok)throw new Error(body.error||'정보를 불러오지 못했습니다.');if(current===sequence.current)setCatalog(body);return body.books as Book[];}
+  try{const response=await fetch(nextTab==='trends'?'/api/trends':(q?`/api/books?q=${encodeURIComponent(q)}`:'/api/books?browse=1'));const body=await response.json() as Catalog & {error?:string};if(!response.ok)throw new Error(body.error||'정보를 불러오지 못했습니다.');if(current===sequence.current)setCatalog(body);return body.books as Book[];}
   catch(e){if(current===sequence.current)setError(e instanceof Error?e.message:'일시적인 오류입니다.');return [];}
   finally{if(current===sequence.current)setBusy(false);}
  },[]);
@@ -61,7 +60,7 @@ export default function Home() {
  const toggleCompare=(book:Book,checked:boolean)=>{setCompared(current=>checked?current.length<3?[...current,book]:current:current.filter(b=>b.id!==book.id));};
  const trends=catalog.books.slice().sort((a,b)=>(a.rank??999)-(b.rank??999));
  const counts=Object.entries(catalog.books.reduce((acc,b)=>({...acc,[b.category]:(acc[b.category]||0)+1}),{} as Record<string,number>)).sort((a,b)=>b[1]-a[1]);
- const reset=()=>{setQuery("");setSubmitted("");setCategory("전체");setBudget("all");setSort("recommended");setError("");};
+ const reset=()=>{setQuery("");setSubmitted("");setCategory("전체");setBudget("all");setSort("recommended");setError("");void load("",tab,mode);};
  return <main className="shell">
   <header className="topbar"><a className="brand" href="/"><BookOpen size={24}/><span>agent<b>book</b></span></a><span className="edition">읽고 싶은 내일을 발견하다</span><Select value={mode} onValueChange={value=>{setMode(value);setBudget('all');void load(query,tab,value);}}><SelectTrigger aria-label="데이터 모드" className="mode"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="demo">예시 데이터</SelectItem><SelectItem value="live">실제 검색</SelectItem></SelectContent></Select></header>
   <div className="desktop-discovery"><section className="intro"><div><p className="eyebrow"><span/> A LITTLE CURIOSITY, A NEW CHAPTER</p><h1>다음에 읽을 책,<br/><span>여기서 발견하세요.</span></h1><p className="intro-description">나에게 닿는 추천부터 한눈에 보는 가격까지.<br/>책을 고르는 시간이 조금 더 즐거워집니다.</p></div><div className="hero-shelf" aria-hidden="true"><span className="shelf-orbit"/><img className="shelf-book shelf-one" src="https://image.yes24.com/goods/99308021/xl" alt=""/><img className="shelf-book shelf-two" src="https://image.yes24.com/goods/2312211/xl" alt=""/><span className="shelf-caption">A GOOD BOOK.<br/>A NEW PERSPECTIVE.</span><span className="shelf-star">✳</span></div></section>
@@ -71,7 +70,7 @@ export default function Home() {
   {recent.length>0&&<div className="recent"><span>최근 검색</span>{recent.map(q=><button key={q} onClick={()=>void search(q)}>{q}</button>)}<button aria-label="최근 검색 지우기" onClick={()=>{setRecent([]);try{localStorage.removeItem('agent-book-recent');}catch{}}}><X size={14}/></button></div>}
   <div className="notice"><Info size={17}/><span>{mode==='demo'?'예시 모드 · 도서, 가격, 순위는 가상 데이터입니다.':'제목·저자·ISBN 검색 · API 연결 전에는 수집 도서에서 검색 · 배송비는 서점 확인'}</span></div>
   </div></div>
-  <Tabs value={tab} onValueChange={value=>{setTab(value);if(value==='recommend')return;setBudget('all');void load(value==='trends'?'':query,value,mode);}}>
+  <Tabs value={tab} onValueChange={value=>{setTab(value);if(value==='recommend'){++sequence.current;setBusy(false);setError('');setCatalog({books:[],source:'',fetchedAt:'',warnings:[],demo:false});return;}setBudget('all');void load(value==='trends'?'':query,value,mode);}}>
    <TabsList className="main-tabs" variant="line"><TabsTrigger value="recommend">오늘의 추천 <span>01</span></TabsTrigger><TabsTrigger value="discover">도서 탐색 <span>02</span></TabsTrigger><TabsTrigger value="trends">독서 트렌드 <span>03</span></TabsTrigger></TabsList>
    {error&&<div className="error" role="alert"><span>{error}</span><button onClick={()=>void load(query,tab,mode)}>다시 시도</button></div>}
    {catalog.warnings.map(w=><p className="error" key={w}>{w}</p>)}

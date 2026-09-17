@@ -18,3 +18,7 @@ export function searchCollected(query:string, books:Book[]=records as Book[], no
   const checked=Date.parse(offer.checkedAt||'');return checked<=now&&now-checked<=7*86400_000;
  })}));
 }
+
+export function browseCollected(now=Date.now()):Book[]{
+ return (records as Book[]).map(book=>({...book,offers:book.offers.filter(o=>{const checked=Date.parse(o.checkedAt||'');return checked<=now&&now-checked<=7*86400_000;})}));
+}

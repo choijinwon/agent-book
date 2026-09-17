@@ -11,7 +11,7 @@ test('partial failure preserves valid books and reports unavailable source',asyn
   if(url.hostname==='www.aladin.co.kr')throw new Error('test failure');
   return Response.json({items:[{title:'<b>소설</b>',link:'https://www.yes24.com/product/goods/123'}]});
  });
- const data=await loadCatalog(keys,'소설');assert.equal(data.books.length,1);assert.equal(data.source,'네이버 웹 검색');assert.equal(data.warnings.length,1);assert.equal(data.demo,false);assert.equal(data.books[0].title,'소설');
+ const data=await loadCatalog(keys,'소설');assert.ok(data.books.some(b=>b.title==='소설'));assert.ok(data.source.includes('네이버 웹 검색'));assert.ok(data.warnings.length>=1);assert.equal(data.demo,false);
 });
 test('total upstream failure becomes safe error without key disclosure',async t=>{
  t.mock.method(globalThis,'fetch',async()=>Response.json({errorCode:'invalid key',errorMessage:'test-only'},{status:401}));
@@ -40,4 +40,10 @@ test('DataLab uses four complete weeks, no demographic filters and no fabricated
 test('DataLab denial is an explicit error, never demo data',async t=>{
  t.mock.method(globalThis,'fetch',async()=>Response.json({error:'denied'},{status:403}));
  await assert.rejects(naverInterest(keys),e=>e.status===502);
+});
+
+test('ISBN search retains verified collected metadata even when live results lack ISBN',async t=>{
+ t.mock.method(globalThis,'fetch',async()=>Response.json({items:[{title:'9788936434120 소년이 온다',description:'9788936434120',link:'https://product.kyobobook.co.kr/detail/S000000001'}]}));
+ const result=await loadCatalog({NAVER_CLIENT_ID:'test-only',NAVER_CLIENT_SECRET:'test-only'},'9788936434120');
+ assert.equal(result.books[0].isbn,'9788936434120');assert.equal(result.books[0].author,'한강');
 });

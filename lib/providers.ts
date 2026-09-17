@@ -78,5 +78,10 @@ export async function loadCatalog(keys:Keys,query:string,trends=false):Promise<C
  results.forEach((result,i)=>{if(result.status==='fulfilled'){sources.push(tasks[i].name);groups.push(result.value);}else warnings.push(`${tasks[i].name} 응답을 받지 못했습니다. 잠시 후 다시 시도하세요.`);});
  if(!trends&&(!groups.length||groups.every(group=>!group.length)))return collectedCatalog(query,warnings);
  if(!groups.length) throw new CatalogError(502,'도서 정보를 불러오지 못했습니다. 잠시 후 다시 시도하세요.');
- return {books:withSavedPrices(await enrichPrices(mergeBooks(groups))),source:sources.join(' · '),fetchedAt:new Date().toISOString(),warnings,demo:false};
+ const live=withSavedPrices(await enrichPrices(mergeBooks(groups)));
+ const collected=trends?[]:searchCollected(query);
+ const knownUrls=new Set(collected.map(b=>b.sourceUrl?.toLowerCase().replace(/^https?:\/\/(www\.)?/,'')));
+ const combined=mergeBooks([collected,live.filter(b=>!knownUrls.has(b.sourceUrl?.toLowerCase().replace(/^https?:\/\/(www\.)?/,'')))]);
+ if(collected.length){sources.push('YES24 수집 자료');warnings.push('수집한 도서 정보를 함께 표시합니다. 저장 가격의 확인 시점을 확인하세요.');}
+ return {books:combined,source:sources.join(' · '),fetchedAt:new Date().toISOString(),warnings,demo:false};
 }
