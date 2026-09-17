@@ -1,6 +1,7 @@
 "use client";
 
 import {budgetPrice,withinBudget,type BudgetBasis} from "@/lib/budget";
+import {WorkReflectionPanel} from "@/components/work-reflection";
 import {ReadingJournal} from "@/components/reading-journal";
 import {BookDate} from "@/components/book-date";
 import {BookMusic} from "@/components/book-music";
@@ -74,12 +75,13 @@ export default function Home() {
   {recent.length>0&&<div className="recent"><span>최근 검색</span>{recent.map(q=><button key={q} onClick={()=>void search(q)}>{q}</button>)}<button aria-label="최근 검색 지우기" onClick={()=>{setRecent([]);try{localStorage.removeItem('agent-book-recent');}catch{}}}><X size={14}/></button></div>}
   <div className="notice"><Info size={17}/><span>{mode==='demo'?'예시 모드 · 도서, 가격, 순위는 가상 데이터입니다.':'제목·저자·ISBN 검색 · API 연결 전에는 수집 도서에서 검색 · 배송비는 서점 확인'}</span></div>
   </div></div>
-  <Tabs value={tab} onValueChange={value=>{setTab(value);if(value==='recommend'||value==='date'||value==='journal'){++sequence.current;setBusy(false);setError('');setCatalog({books:[],source:'',fetchedAt:'',warnings:[],demo:false});return;}setBudget('all');void load(value==='trends'?'':query,value,mode);}}>
-   <TabsList className="main-tabs" variant="line"><TabsTrigger value="recommend">오늘의 추천 <span>01</span></TabsTrigger><TabsTrigger value="discover">도서 탐색 <span>02</span></TabsTrigger><TabsTrigger value="trends">독서 트렌드 <span>03</span></TabsTrigger><TabsTrigger value="date">책 소개팅 <span>04</span></TabsTrigger><TabsTrigger value="journal">내 3D 책장 <span>05</span></TabsTrigger></TabsList>
+  <Tabs value={tab} onValueChange={value=>{setTab(value);if(value==='recommend'||value==='date'||value==='journal'||value==='reflection'){++sequence.current;setBusy(false);setError('');setCatalog({books:[],source:'',fetchedAt:'',warnings:[],demo:false});return;}setBudget('all');void load(value==='trends'?'':query,value,mode);}}>
+   <TabsList className="main-tabs" variant="line"><TabsTrigger value="recommend">오늘의 추천 <span>01</span></TabsTrigger><TabsTrigger value="discover">도서 탐색 <span>02</span></TabsTrigger><TabsTrigger value="trends">독서 트렌드 <span>03</span></TabsTrigger><TabsTrigger value="date">책 소개팅 <span>04</span></TabsTrigger><TabsTrigger value="journal">내 3D 책장 <span>05</span></TabsTrigger><TabsTrigger value="reflection">퇴근 후 마음 정리 <span>06</span></TabsTrigger></TabsList>
    {error&&<div className="error" role="alert"><span>{error}</span><button onClick={()=>void load(query,tab,mode)}>다시 시도</button></div>}
    {catalog.warnings.map(w=><p className="error" key={w}>{w}</p>)}
    <TabsContent value="recommend"><BookRecommender recent={recent} ready={status.ai} onSearch={q=>{setMode('live');setQuery(q);setTab('discover');remember(q);void load(q,'discover','live');}}/></TabsContent>
    <TabsContent value="date"><BookDate onSearch={q=>{setMode("live");setQuery(q);setTab("discover");remember(q);void load(q,"discover","live");}}/></TabsContent>
+   <TabsContent value="reflection" forceMount hidden={tab!=="reflection"} className="journal-tab"><WorkReflectionPanel onSearch={q=>{setMode("live");setQuery(q);setTab("discover");remember(q);void load(q,"discover","live");}}/></TabsContent>
    <TabsContent value="journal" forceMount hidden={tab!=="journal"} className="journal-tab"><ReadingJournal initialBook={journalBook}/></TabsContent>
    <TabsContent value="discover">
     <div className="workspace"><aside className="filters" aria-label="도서 필터"><div className="category-list">{categories.map(c=><button key={c} className={category===c?'selected':''} aria-pressed={category===c} onClick={()=>setCategory(c)}>{c}<span>{c==='전체'?catalog.books.length:catalog.books.filter(b=>b.category===c).length}</span></button>)}</div><div className="budget-filter"><Select value={budgetBasis} onValueChange={v=>setBudgetBasis(v as BudgetBasis)}><SelectTrigger aria-label="가격 기준"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="book">도서 가격</SelectItem><SelectItem value="total">배송비 포함 총액</SelectItem></SelectContent></Select><Select value={budget} onValueChange={setBudget}><SelectTrigger aria-label="예산 상한"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="all">제한 없음</SelectItem><SelectItem value="15000">15,000원 이하</SelectItem><SelectItem value="20000">20,000원 이하</SelectItem><SelectItem value="30000">30,000원 이하</SelectItem></SelectContent></Select><button className="reset-filter" onClick={reset}>초기화</button></div><p className="filter-help">{budgetBasis==='book'?'도서 가격 기준 · 배송비는 별도이며 결제 총액은 달라질 수 있습니다.':'배송비까지 확인된 도서만 포함합니다. 배송비 미확인 도서는 제외됩니다.'}{budget!=='all'&&` 가격 미확인으로 제외: ${catalog.books.filter(b=>(category==='전체'||b.category===category)&&budgetPrice(b,budgetBasis)===undefined).length}권`}</p></aside>

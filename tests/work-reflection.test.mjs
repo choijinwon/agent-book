@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {reflectionGuide,readReflections,addReflection} from '../lib/work-reflection.ts';
+const entry={id:'1',reason:'people',need:'reflect',note:'내 생각',createdAt:'2026-09-17T00:00:00.000Z'};
+test('reflection storage validates private records and refuses silent capacity loss',()=>{assert.deepEqual(readReflections('{'),[]);assert.deepEqual(readReflections(JSON.stringify([entry,entry,{...entry,id:'2',need:'bad'}])),[entry]);assert.throws(()=>addReflection([],{...entry,note:' '}));assert.throws(()=>addReflection(Array.from({length:100},(_,i)=>({...entry,id:String(i)})),{...entry,id:'101'}));assert.equal(addReflection([],{...entry,note:' hello '})[0].note,'hello');});
+test('guide supports every need and uses topics instead of personal notes for search',()=>{assert.equal(reflectionGuide('load','change').query,'업무 우선순위');assert.match(reflectionGuide('people','reflect').action,/사실/);assert.equal(reflectionGuide('fit','move').query,'이직 커리어');assert.equal(reflectionGuide('bad','bad').reason.id,'people');});
