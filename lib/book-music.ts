@@ -1,23 +1,14 @@
 import type {Book} from './books';
-export const readingTracks={
- ambre:{title:'Ambre',artist:'Nils Frahm',style:'차분한 피아노',url:'https://nilsfrahm.bandcamp.com/album/wintermusik',source:'https://www.nilsfrahm.com/works/wintermusik/'},
- glass:{title:'Glass',artist:'Hania Rani',style:'흐르는 피아노',url:'https://haniarani.bandcamp.com/track/glass',source:'https://haniarani.com/video/'},
- near:{title:'Near Light',artist:'Ólafur Arnalds',style:'공간감 있는 연주',url:'https://soundcloud.com/erasedtapes/olafur-arnalds-near-light',source:'https://www.erasedtapes.com/news/2012'},
- saman:{title:'saman',artist:'Ólafur Arnalds',style:'여백이 있는 피아노',url:'https://soundcloud.com/olafur-arnalds/saman',source:'https://uma.lnk.to/saman'},
-};
-type TrackId=keyof typeof readingTracks;
-const special:Record<string,{tracks:TrackId[];reason:string}>={
- 'yes24-99308021':{tracks:['ambre','glass'],reason:'일상의 온기를 다루는 이 소설에는 부드러운 피아노를 곁들여 보세요. 문장 사이에 여유를 두고 읽고 싶은 날의 조합입니다.'},
- 'yes24-13137546':{tracks:['saman','ambre'],reason:'역사의 상처를 마주하는 동안 감정을 재촉하지 않는 차분한 피아노를 골랐습니다. 음악이 무겁게 느껴지면 잠시 멈추고 읽어도 좋습니다.'},
- 'yes24-103495056':{tracks:['saman','near'],reason:'기억과 상실을 천천히 읽는 시간에, 여백이 있는 연주를 곁들이는 조합을 제안합니다.'},
- 'yes24-2312211':{tracks:['near','glass'],reason:'우주와 인간을 생각하며 시야를 넓히는 독서에 공간감 있는 연주를 골랐습니다.'},
- 'yes24-172574653':{tracks:['glass','ambre'],reason:'돈에 대한 판단과 행동을 돌아볼 때, 가사 대신 피아노의 흐름을 배경으로 두는 조합을 제안합니다.'},
- 'yes24-119697570':{tracks:['ambre','saman'],reason:'감정과 관계를 따라가는 성장소설에 부드러운 피아노의 여운을 더해 보세요.'},
- 'yes24-176787':{tracks:['saman','glass'],reason:'자신만의 방향을 고민하며 고전을 읽을 때, 조용한 피아노와 함께 문장에 머물러 보세요.'},
- 'yes24-23030284':{tracks:['near','ambre'],reason:'인류의 긴 시간을 생각하는 독서에 공간감 있는 연주를 곁들여 보는 조합입니다.'},
-};
-export function musicForBook(book:Pick<Book,'id'|'category'>){
- const exact=special[book.id];const category=book.category||'';
- const profile=exact||(/과학|IT|컴퓨터/.test(category)?{tracks:['near','glass'] as TrackId[],reason:'이 책의 분야를 기준으로, 새로운 개념을 읽는 시간에 어울릴 공간감 있는 연주를 골랐습니다.'}:/경제|경영|자기계발/.test(category)?{tracks:['glass','ambre'] as TrackId[],reason:'이 책의 분야를 기준으로, 생각을 정리하며 읽을 때 곁들일 피아노 연주를 골랐습니다.'}:{tracks:['ambre','saman'] as TrackId[],reason:'상세 분위기 정보가 없는 책에는 잔잔한 피아노를 기본 조합으로 제안합니다.'});
- return {reason:profile.reason,basis:exact?'책별 선정':'분야·기본 선정',tracks:profile.tracks.map(id=>({id,...readingTracks[id],listenUrl:`https://music.youtube.com/search?q=${encodeURIComponent(readingTracks[id].artist+' '+readingTracks[id].title)}`}))};
+type Association={isbns:string[];theme:string;basis:'역사적 배경'|'주제 해석';bookEvidence:string;bookSource:string;title:string;artist:string;query?:string;style:string;musicEvidence:string;musicSource:string;reason:string};
+// Only verified editions receive associations. No category or generic piano fallback.
+export const musicAssociations:Association[]=[
+ {isbns:['9788936434120'],theme:'상실 뒤에 남은 사람들을 향한 위로',basis:'주제 해석',bookEvidence:'작가의 공식 소개는 1980년 광주와 동호, 그리고 남겨진 사람들의 고통을 설명합니다.',bookSource:'https://han-kang.net/Human-Acts-Korean',title:'봄날 (Spring Day)',artist:'BTS',style:'K-pop · 가사 있음',musicEvidence:'공식 앨범 소개는 봄날을 수록한 YOU NEVER WALK ALONE의 메시지를 고통받는 청춘에게 전하는 위로와 희망으로 설명합니다.',musicSource:'https://bts.ibighit.com/eng/discography/detail/you_never_walk_alone.html',reason:'책에서 상실을 안고 살아가는 사람들을 만난 뒤, 위로와 희망이라는 앨범의 메시지로 이어 듣도록 골랐습니다. 소설의 역사적 사건과 곡의 창작 배경이 같다는 의미는 아닙니다.'},
+ {isbns:['9788954682152'],theme:'떠난 존재와의 관계를 놓지 않는 마음',basis:'주제 해석',bookEvidence:'상품 소개는 이 작품을 사랑의 기억으로 설명하며, 작가의 노벨 강연은 제주 민간인 학살과 기억의 시간을 다룹니다.',bookSource:'https://www.nobelprize.org/uploads/2024/12/han-lecture-korean.pdf',title:'어떻게 이별까지 사랑하겠어, 널 사랑하는 거지',artist:'AKMU',style:'K-pop · 가사 있음',musicEvidence:'AKMU의 항해 타이틀곡입니다. 이별과 사랑을 분리해 바라보는 제목의 메시지를 선곡의 단서로 삼았습니다.',musicSource:'https://music.apple.com/us/album/sailing/1480802547',reason:'사라진 존재와의 관계를 놓지 않는다는 독서의 여운을, 이별 속에서도 남는 사랑이라는 곡의 메시지에 연결한 해석입니다. 역사적 희생을 다루는 소설과 연애의 이별을 동일한 경험으로 보지는 않습니다.'},
+ {isbns:['9788937460449','9788954620147'],theme:'성장·유혹·자신만의 세계',basis:'주제 해석',bookEvidence:'도서 소개는 싱클레어의 성장과 자신에게 이르는 길, 알을 깨고 나오는 새의 이미지를 제시합니다.',bookSource:'https://www.yes24.com/product/goods/176787',title:'피 땀 눈물 (Blood Sweat & Tears)',artist:'BTS',style:'K-pop · 가사 있음 · WINGS',musicEvidence:'소속사의 WINGS 소개는 처음 만나는 유혹과 고통, 알을 깨고 날아오르는 소년들의 이미지를 설명하며 이 곡을 수록합니다.',musicSource:'https://bts.ibighit.com/eng/discography/detail/wings.html',reason:'책과 앨범 소개에 공통으로 나타나는 성장·유혹·껍질을 깨는 이미지를 연결한 선곡입니다. 읽은 뒤 뮤직비디오의 상징과 소설의 장면을 비교해 볼 수 있습니다.'},
+ {isbns:['9788983711892','9788983711540'],theme:'세계를 바라보며 인간의 자리를 생각하기',basis:'주제 해석',bookEvidence:'칼 세이건의 책은 천문학과 과학의 탐험가들을 통해 우주를 이해하는 여정을 다룹니다.',bookSource:'https://www.yes24.com/product/goods/2312211',title:'소우주 (Mikrokosmos)',artist:'BTS',style:'K-pop · 가사 있음',musicEvidence:'공식 소개는 이 곡이 자신을 둘러싼 세계에 대한 인간적인 관심에서 출발했다고 설명합니다.',musicSource:'https://bts.ibighit.com/kor/discography/detail/map_of_the_soul-persona.html',reason:'책이 넓은 우주를 이해하게 한다면, 이 곡은 주변 세계와 사람에게 시선을 돌립니다. 우주를 읽은 뒤 그 안에 사는 사람들을 생각해 보자는 연결이며, 과학 내용을 설명하는 노래라는 뜻은 아닙니다.'},
+];
+export function musicForBook(book:Pick<Book,'isbn'>){
+ const match=musicAssociations.find(a=>a.isbns.includes(book.isbn));
+ if(!match)return null;
+ return {...match,listenUrl:`https://music.youtube.com/search?q=${encodeURIComponent(match.query||match.artist+' '+match.title)}`};
 }
