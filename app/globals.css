@@ -305,3 +305,38 @@ footer p { color: #737373; font-size: 12px; margin-top: 6px; }
 .music-service{display:inline-flex;align-items:center;gap:3px;font-size:9px;color:#997287;white-space:nowrap;flex-shrink:0}
 .music-unavailable{display:flex;align-items:flex-start;gap:6px;font-size:10px;color:#9d929f;line-height:1.7;margin:0 0 18px}.music-unavailable svg{flex-shrink:0;margin-top:2px}.music-evidence{background:#fff9;padding:12px;border-radius:8px;margin-bottom:10px}.music-evidence dt{font-size:10px;font-weight:650;color:#80658f;margin-bottom:4px}.music-evidence dd{font-size:11px;color:#8f8196;line-height:1.8;margin-bottom:12px}.music-evidence dd:last-child{margin-bottom:0}.music-evidence a{display:block;color:#7d61a2;text-decoration:underline;font-size:10px;margin-top:3px}.music-content>.music-relation{font-size:12px;color:#75627f}
 .music-content>.music-theme{font-size:10px;font-weight:650;color:#7a5e96;margin:0 0 6px}
+
+/* Desktop uses a compact introduction beside a unified search workspace. */
+@media (min-width: 1024px) {
+ .shell { max-width: 1440px; padding: 0 48px 32px; }
+ .topbar { min-height: 80px; }
+ .desktop-discovery { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 32px; align-items: start; margin: 30px 0; }
+ .intro { margin: 0; padding: 32px; min-height: 270px; height: 100%; border-radius: 18px; }
+ .intro h1 { font-size: clamp(30px, 2.8vw, 40px); letter-spacing: -1.8px; }
+ .intro-description { font-size: 13px; max-width: 290px; }
+ .hero-shelf { display: none; }
+ .search-hub { min-width: 0; display: flex; flex-direction: column; justify-content: center; align-self: stretch; padding: 28px; background: white; border: 1px solid #e4e1e9; border-radius: 18px; }
+ .search-hub .searchbox { order: 0; width: 100%; max-width: none; margin: 0; }
+ .search-hub .search-meta { order: 1; justify-content: flex-start; margin: 14px 0 0; }
+ .search-hub .recent { order: 2; justify-content: flex-start; }
+ .search-hub .sentence-search { order: 3; width: 100%; max-width: none; margin: 20px 0 0; }
+ .search-hub .sentence-search>summary { padding: 13px 15px; font-size: 12px; }
+ .search-hub .notice { order: 4; justify-content: flex-start; line-height: 1.7; margin-top: 12px; }
+ .shell>[data-slot=tabs] { padding-top: 0; }
+ .main-tabs { gap: 36px!important; height: 56px!important; }
+ .main-tabs [data-slot=tabs-trigger] { font-size: 17px; }
+ .recommend-panel { padding-top: 26px; }
+ .picks-heading { margin-bottom: 22px; }
+ .picks-grid { gap: 24px; align-items: stretch; }
+ .pick-art { height: 205px; }
+ .pick-art img { height: 158px; max-width: 118px; }
+ .pick-content { padding: 22px; }
+ .pick-content h3 { font-size: 21px; min-height: 61px; }
+ .pick-author { min-height: 35px; line-height: 1.6; }
+ .pick-reason { margin: 14px 0 18px; }
+ .pick-bottom { margin-top: auto; }
+ .book-card { grid-template-columns: 40px minmax(0,1fr) 180px 125px; column-gap: 22px; }
+ .book-card .book-info { grid-column: auto; }
+ .filters { align-items: flex-start; }
+ .category-list { flex: 1; }
+}
