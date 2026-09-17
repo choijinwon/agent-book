@@ -10,3 +10,9 @@ export function shelfBook(entry:JournalEntry,books:Book[]=records as Book[]):Boo
  return matches.length===1?matches[0]:null;
 }
 export function spineTone(id:string){return [...id].reduce((sum,c)=>sum+c.charCodeAt(0),0)%6;}
+export function moveShelfEntry(entries:JournalEntry[],id:string,direction:-1|1):JournalEntry[]{
+ const index=entries.findIndex(e=>e.id===id);if(index<0)return entries;
+ const indices=entries.flatMap((e,i)=>e.status===entries[index].status?[i]:[]);
+ const target=indices[indices.indexOf(index)+direction];if(target===undefined)return entries;
+ const next=[...entries];[next[index],next[target]]=[next[target],next[index]];return next;
+}
