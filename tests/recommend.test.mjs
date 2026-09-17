@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {recommend,validateSelection,preferenceSchema} from '../lib/recommend.ts';
+const book={id:'real-1',isbn:'9788936434120',title:'소년이 온다',author:'한강',publisher:'창비',category:'소설',description:'도서 소개',offers:[]};
+const input={prompt:'역사를 이해하는 소설',genre:'소설'};
+const keys={OPENAI_API_KEY:'private-test',NAVER_CLIENT_ID:'test',NAVER_CLIENT_SECRET:'test'};
+test('missing AI connection fails explicitly without invented recommendations',async()=>{await assert.rejects(recommend({},input),e=>e.status===503);});
+test('rejects unknown/duplicate candidate ids and invalid preferences',()=>{for(const ids of [['c999'],['c0','c0'],['invented']])assert.throws(()=>validateSelection({summary:'추천',items:ids.map(id=>({id,reason:'이유',caveat:''}))},[book]));assert.equal(preferenceSchema.safeParse({prompt:'짧음',genre:'전체'}).success,false);});
+test('returns only real search objects and independently generated reasons',async()=>{let calls=0;const deps={generate:async()=>++calls===1?{queries:['역사 소설']}:{summary:'역사에 관심이 있다면',items:[{id:'c0',reason:'역사 소설을 찾는 목적과 연결됩니다.',caveat:'소개와 목차를 확인하세요.'}]},loadCatalog:async()=>({books:[book],source:'test',fetchedAt:'',warnings:[],demo:false})};const result=await recommend(keys,input,deps);assert.equal(calls,2);assert.equal(result.items[0].book.title,book.title);assert.deepEqual(result.items[0].book.offers,[]);assert.equal(result.items.length,1);});
+test('empty search does not call AI selection or generate books',async()=>{let calls=0;const result=await recommend(keys,input,{generate:async()=>{calls++;return {queries:['검색어']};},loadCatalog:async()=>({books:[],source:'test',fetchedAt:'',warnings:[],demo:false})});assert.equal(calls,1);assert.equal(result.items.length,0);});
+test('search failure surfaces error instead of fabricated recommendations',async()=>{await assert.rejects(recommend(keys,input,{generate:async()=>({queries:['검색어']}),loadCatalog:async()=>{throw new Error('unavailable');}}),e=>e.status===502);});

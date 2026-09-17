@@ -1,0 +1,14 @@
+import type {Book} from './books';
+type Association={isbns:string[];theme:string;basis:'역사적 배경'|'주제 해석';bookEvidence:string;bookSource:string;title:string;artist:string;query?:string;style:string;musicEvidence:string;musicSource:string;reason:string};
+// Only verified editions receive associations. No category or generic piano fallback.
+export const musicAssociations:Association[]=[
+ {isbns:['9788936434120'],theme:'상실 뒤에 남은 사람들을 향한 위로',basis:'주제 해석',bookEvidence:'작가의 공식 소개는 1980년 광주와 동호, 그리고 남겨진 사람들의 고통을 설명합니다.',bookSource:'https://han-kang.net/Human-Acts-Korean',title:'봄날 (Spring Day)',artist:'BTS',style:'K-pop · 가사 있음',musicEvidence:'공식 앨범 소개는 봄날을 수록한 YOU NEVER WALK ALONE의 메시지를 고통받는 청춘에게 전하는 위로와 희망으로 설명합니다.',musicSource:'https://bts.ibighit.com/eng/discography/detail/you_never_walk_alone.html',reason:'책에서 상실을 안고 살아가는 사람들을 만난 뒤, 위로와 희망이라는 앨범의 메시지로 이어 듣도록 골랐습니다. 소설의 역사적 사건과 곡의 창작 배경이 같다는 의미는 아닙니다.'},
+ {isbns:['9788954682152'],theme:'떠난 존재와의 관계를 놓지 않는 마음',basis:'주제 해석',bookEvidence:'상품 소개는 이 작품을 사랑의 기억으로 설명하며, 작가의 노벨 강연은 제주 민간인 학살과 기억의 시간을 다룹니다.',bookSource:'https://www.nobelprize.org/uploads/2024/12/han-lecture-korean.pdf',title:'어떻게 이별까지 사랑하겠어, 널 사랑하는 거지',artist:'AKMU',style:'K-pop · 가사 있음',musicEvidence:'AKMU의 항해 타이틀곡입니다. 이별과 사랑을 분리해 바라보는 제목의 메시지를 선곡의 단서로 삼았습니다.',musicSource:'https://music.apple.com/us/album/sailing/1480802547',reason:'사라진 존재와의 관계를 놓지 않는다는 독서의 여운을, 이별 속에서도 남는 사랑이라는 곡의 메시지에 연결한 해석입니다. 역사적 희생을 다루는 소설과 연애의 이별을 동일한 경험으로 보지는 않습니다.'},
+ {isbns:['9788937460449','9788954620147'],theme:'성장·유혹·자신만의 세계',basis:'주제 해석',bookEvidence:'도서 소개는 싱클레어의 성장과 자신에게 이르는 길, 알을 깨고 나오는 새의 이미지를 제시합니다.',bookSource:'https://www.yes24.com/product/goods/176787',title:'피 땀 눈물 (Blood Sweat & Tears)',artist:'BTS',style:'K-pop · 가사 있음 · WINGS',musicEvidence:'소속사의 WINGS 소개는 처음 만나는 유혹과 고통, 알을 깨고 날아오르는 소년들의 이미지를 설명하며 이 곡을 수록합니다.',musicSource:'https://bts.ibighit.com/eng/discography/detail/wings.html',reason:'책과 앨범 소개에 공통으로 나타나는 성장·유혹·껍질을 깨는 이미지를 연결한 선곡입니다. 읽은 뒤 뮤직비디오의 상징과 소설의 장면을 비교해 볼 수 있습니다.'},
+ {isbns:['9788983711892','9788983711540'],theme:'세계를 바라보며 인간의 자리를 생각하기',basis:'주제 해석',bookEvidence:'칼 세이건의 책은 천문학과 과학의 탐험가들을 통해 우주를 이해하는 여정을 다룹니다.',bookSource:'https://www.yes24.com/product/goods/2312211',title:'소우주 (Mikrokosmos)',artist:'BTS',style:'K-pop · 가사 있음',musicEvidence:'공식 소개는 이 곡이 자신을 둘러싼 세계에 대한 인간적인 관심에서 출발했다고 설명합니다.',musicSource:'https://bts.ibighit.com/kor/discography/detail/map_of_the_soul-persona.html',reason:'책이 넓은 우주를 이해하게 한다면, 이 곡은 주변 세계와 사람에게 시선을 돌립니다. 우주를 읽은 뒤 그 안에 사는 사람들을 생각해 보자는 연결이며, 과학 내용을 설명하는 노래라는 뜻은 아닙니다.'},
+];
+export function musicForBook(book:Pick<Book,'isbn'>){
+ const match=musicAssociations.find(a=>a.isbns.includes(book.isbn));
+ if(!match)return null;
+ return {...match,listenUrl:`https://music.youtube.com/search?q=${encodeURIComponent(match.query||match.artist+' '+match.title)}`};
+}
